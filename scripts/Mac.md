@@ -75,8 +75,10 @@ brew "ffmpeg"
 brew "lazydocker"
 brew "dive"
 brew "ctop"
+brew "qwen-code"
 
 # GUI 应用
+cask "intellij-idea"
 cask "clash-verge-rev"
 cask "google-chrome"
 cask "obsidian"
@@ -701,8 +703,10 @@ brew "ffmpeg"
 brew "lazydocker"
 brew "dive"
 brew "ctop"
+brew "qwen-code"
 
 # GUI 应用
+cast "intellij-idea"
 cask "clash-verge-rev"
 cask "google-chrome"
 cask "obsidian"
