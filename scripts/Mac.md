@@ -88,6 +88,8 @@ cask "the-unarchiver"
 cask "iterm2"
 cask "postman" # API开发和测试工具 
 cask "docker-desktop" # 容器化平台 
+cask "wechat" # 微信
+cask "baidunetdisk" # 百度网盘
 # cask "microsoft-remote-desktop" # 远程桌面
 # cask "proxyman" # 抓包
 # cask "termius" # ssh
@@ -165,6 +167,8 @@ git config --global user.name "starhq"
 git config --global user.email "starimba@gmail.com"
 # 推荐：防止不同平台换行符报错
 git config --global core.autocrlf input
+git config --global core.editor vim # 或 code、nano
+git config --global init.defaultBranch main # 设置默认分支为main
 
 # 创建 GitHub 专用密钥目录
 mkdir -p ~/.ssh/github
@@ -436,6 +440,16 @@ cfg() {
   file=$(find ~/.asdf -type f \( -name "*.properties" -o -name "*.xml" -o -name "gradle.properties" -o -name "mavenrc" -o -name ".mavenrc" \) 2>/dev/null | fzf)
   [ -n "$file" ] && vi "$file"
 }
+
+clash() {
+  cd ~/workspace/clash/  && ./update-clash-sources.sh 
+}
+
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/wangjian/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
 
 EOF
 fi
@@ -714,6 +728,8 @@ cask "raycast"
 cask "warp"
 cask "the-unarchiver"
 cask "iterm2"
+cask "wechat" # 微信
+cask "baidunetdisk" # 百度网盘
 cask "postman" # API开发和测试工具
 cask "docker-desktop" # 容器化平台 
 # cask "microsoft-remote-desktop" # 远程桌面
@@ -793,6 +809,8 @@ configure_git_ssh() {
   git config --global user.name "starhq"
   git config --global user.email "starimba@gmail.com"
   git config --global core.autocrlf input
+  git config --global core.editor vim # 或 code、nano
+  git config --global init.defaultBranch main # 设置默认分支为main
 
   mkdir -p ~/.ssh/github
   chmod 700 ~/.ssh ~/.ssh/github
@@ -1006,6 +1024,16 @@ cfg() {
   file=$(find ~/.asdf -type f \( -name "*.properties" -o -name "*.xml" -o -name "gradle.properties" -o -name "mavenrc" -o -name ".mavenrc" \) 2>/dev/null | fzf)
   [ -n "$file" ] && vi "$file"
 }
+
+clash() {
+  cd ~/workspace/clash/  && ./update-clash-sources.sh 
+}
+
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/wangjian/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
 EOF
   fi
 }
