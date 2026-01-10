@@ -445,12 +445,56 @@ clash() {
   cd ~/workspace/clash/  && ./update-clash-sources.sh 
 }
 
+gradle-mirror() {
+  local MIRROR_URL="https\\://mirrors.cloud.tencent.com/gradle"
+ 
+  # 解析参数
+  case "$1" in
+    aliyun)
+      MIRROR_URL="https\\://mirrors.aliyun.com/gradle"
+      ;;
+    huawei)
+      MIRROR_URL="https\\://repo.huaweicloud.com/gradle"
+      ;;
+    "")
+      # 默认腾讯云
+      ;;
+    *)
+      ;;
+  esac
+
+  # 检查是否在 Gradle 项目根目录
+  if [[ ! -f "gradle/wrapper/gradle-wrapper.properties" ]]; then
+    echo "❌ 当前目录不是 Gradle 项目根目录（未找到 gradle/wrapper/gradle-wrapper.properties）"
+    return 1
+  fi
+
+  # 检查是否已安装 sd
+  if ! command -v sd &> /dev/null; then
+    echo "❌ 未找到 'sd' 命令，请先安装：brew install sd"
+    return 1
+  fi
+
+  # 执行替换
+  echo "🔄 正在将 Gradle 镜像源替换为: ${MIRROR_URL//\\/}"
+  sd 'https\\://services.gradle.org/distributions' "$MIRROR_URL" gradle/wrapper/gradle-wrapper.properties
+
+  if [[ $? -eq 0 ]]; then
+    echo "✅ 替换成功！新配置:"
+    grep "distributionUrl" gradle/wrapper/gradle-wrapper.properties
+  else
+    echo "❌ 替换失败，请检查文件权限或内容格式"
+    return 1
+  fi
+}
+
 # The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/wangjian/.docker/completions $fpath)
+fpath=($HOME/.docker/completions $fpath)
 autoload -Uz compinit
 compinit
 # End of Docker CLI completions
 
+export GRADLE_USER_HOME="$HOME/.gradle"
 EOF
 fi
 ~~~
@@ -1029,11 +1073,56 @@ clash() {
   cd ~/workspace/clash/  && ./update-clash-sources.sh 
 }
 
+gradle-mirror() {
+  local MIRROR_URL="https\\://mirrors.cloud.tencent.com/gradle"
+ 
+  # 解析参数
+  case "$1" in
+    aliyun)
+      MIRROR_URL="https\\://mirrors.aliyun.com/gradle"
+      ;;
+    huawei)
+      MIRROR_URL="https\\://repo.huaweicloud.com/gradle"
+      ;;
+    "")
+      # 默认腾讯云
+      ;;
+    *)
+      ;;
+  esac
+
+  # 检查是否在 Gradle 项目根目录
+  if [[ ! -f "gradle/wrapper/gradle-wrapper.properties" ]]; then
+    echo "❌ 当前目录不是 Gradle 项目根目录（未找到 gradle/wrapper/gradle-wrapper.properties）"
+    return 1
+  fi
+
+  # 检查是否已安装 sd
+  if ! command -v sd &> /dev/null; then
+    echo "❌ 未找到 'sd' 命令，请先安装：brew install sd"
+    return 1
+  fi
+
+  # 执行替换
+  echo "🔄 正在将 Gradle 镜像源替换为: ${MIRROR_URL//\\/}"
+  sd 'https\\://services.gradle.org/distributions' "$MIRROR_URL" gradle/wrapper/gradle-wrapper.properties
+
+  if [[ $? -eq 0 ]]; then
+    echo "✅ 替换成功！新配置:"
+    grep "distributionUrl" gradle/wrapper/gradle-wrapper.properties
+  else
+    echo "❌ 替换失败，请检查文件权限或内容格式"
+    return 1
+  fi
+}
+
 # The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/wangjian/.docker/completions $fpath)
+fpath=($HOME$/.docker/completions $fpath)
 autoload -Uz compinit
 compinit
 # End of Docker CLI completions
+
+export GRADLE_USER_HOME="$HOME/.gradle"
 EOF
   fi
 }
