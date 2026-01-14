@@ -517,7 +517,7 @@ asdf global nodejs 24.12.0
 npm config set registry https://registry.npmmirror.com
 corepack enable
 
-npm install -g typescript tldr commitizen cz-conventional-changelog
+npm install -g typescript tldr commitizen cz-conventional-changelog release-it
 ~~~
 
 ## java
@@ -1161,7 +1161,7 @@ setup_dev_env() {
 
   npm config set registry https://registry.npmmirror.com
   corepack enable
-  npm install -g typescript tldr commitizen cz-conventional-changelog
+  npm install -g typescript tldr commitizen cz-conventional-changelog release-it
 
   # Go 配置
   echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.zprofile
