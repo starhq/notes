@@ -432,7 +432,7 @@ EOF
 }
 
 # ===================================================================
-# ⚙️ BUILD TOOLS
+# ⚙️ OTHERS
 # ===================================================================
 
 cfg() {
@@ -494,7 +494,11 @@ autoload -Uz compinit
 compinit
 # End of Docker CLI completions
 
+# GRADLE_USER_HOME
 export GRADLE_USER_HOME="$HOME/.gradle"
+
+# commitizen-practice-config
+echo '{"path": "cz-conventional-changelog"}' > ~/.czrc 
 EOF
 fi
 ~~~
@@ -513,7 +517,7 @@ asdf global nodejs 24.12.0
 npm config set registry https://registry.npmmirror.com
 corepack enable
 
-npm install -g typescript tldr
+npm install -g typescript tldr commitizen cz-conventional-changelog
 ~~~
 
 ## java
@@ -1123,6 +1127,9 @@ compinit
 # End of Docker CLI completions
 
 export GRADLE_USER_HOME="$HOME/.gradle"
+
+# commitizen-practice-config
+echo '{"path": "cz-conventional-changelog"}' > ~/.czrc
 EOF
   fi
 }
@@ -1154,7 +1161,7 @@ setup_dev_env() {
 
   npm config set registry https://registry.npmmirror.com
   corepack enable
-  npm install -g typescript tldr
+  npm install -g typescript tldr commitizen cz-conventional-changelog
 
   # Go 配置
   echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.zprofile
