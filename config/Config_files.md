@@ -1,4 +1,5 @@
 # Vscode配置:
+
 ## settings.json
 ~~~json
 {
@@ -247,4 +248,113 @@
     "**/.gradle/**": true
   }
 }
+~~~
+
+# git 配置信息
+
+## .gitconfig
+
+~~~ini
+[user]
+	name = starhq
+	email = starimba@gmail.com
+[core]
+	excludesfile = ~/.gitignore_global
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[commit]
+	template = ~/.stCommitMsg
+[init]
+	defaultBranch = main
+[alias]
+  	# 基础
+  	st = status -sb
+  	co = checkout
+  	cob = checkout -b
+  	br = branch
+  	bra = branch -a
+  	ci = commit
+  	cm = commit -m
+  	ca = commit --amend
+  	caf = commit --amend --no-edit
+
+  	# 分支管理
+  	brd = branch -d
+  	brD = branch -D
+  	brc = "!f() { git branch --merged | grep -v '\\*\\|main\\|develop' | xargs -n 1 git branch -d; }; f"
+  	feat = "!f() { git checkout -b feature/$1; }; f"
+  	fix = "!f() { git checkout -b fix/$1; }; f"
+
+  	# 日志
+  	lg = log --oneline --graph --all
+	ll = log --pretty=format:\"%C(yellow)%h%C(reset) %C(green)%ad%C(reset) %C(blue)[%an]%C(reset) %s\" --date=short
+  	last = log -n
+
+ 	# 远程
+ 	pl = pull --rebase
+ 	fpr = fetch --prune
+ 	psu = push -u origin HEAD
+
+ 	# 修复
+ 	unstage = reset HEAD --
+  	discard = checkout --
+  	undo = reset --soft HEAD~1
+  	rb = rebase -i HEAD~3
+  	rbf = "!f() { git rebase -i --autosquash $(git merge-base HEAD main); }; f"
+
+  	# 状态
+  	untracked = ls-files --others --exclude-standard
+  	sl = stash list
+ 	track = branch -vv
+
+	# 交互式 checkout
+  	fco = "!f() { git checkout $(git branch --all | fzf --height 40% --reverse | sed 's/.* //'); }; f"
+	# 仅在特性分支上允许 rebase
+  	safe-rebase = "!f() { if [[ $(git branch --show-current) != main && $(git branch --show-current) != develop ]]; then git rebase main; else echo 'Cannot rebase main/develop!'; fi; }; f"
+~~~
+
+## ..gitignore
+
+~~~TEXT
+HELP.md  
+.gradle  
+build/  
+!gradle/wrapper/gradle-wrapper.jar  
+!**/src/main/**/build/  
+!**/src/test/**/build/  
+  
+### STS ###  
+.apt_generated  
+.classpath  
+.factorypath  
+.project  
+.settings  
+.springBeans  
+.sts4-cache  
+bin/  
+!**/src/main/**/bin/  
+!**/src/test/**/bin/  
+  
+### IntelliJ IDEA ###  
+.idea  
+*.iws  
+*.iml  
+*.ipr  
+out/  
+!**/src/main/**/out/  
+!**/src/test/**/out/  
+  
+### NetBeans ###  
+/nbproject/private/  
+/nbbuild/  
+/dist/  
+/nbdist/  
+/.nb-gradle/  
+  
+### VS Code ###  
+.vscode/
 ~~~
