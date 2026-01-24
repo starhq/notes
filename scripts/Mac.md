@@ -1,6 +1,18 @@
+---
+date: 2026-01-24
+tags:
+  - homebrew
+  - system-config
+  - git-config
+  - iterm2
+  - terminal-config
+  - develop-env-config
+  - docker-config
+---
+
 # 安装homebrew
 
-~~~shell
+```shell
 # 1. 准备工作：安装 Xcode 命令行工具
 if ! xcode-select -p &>/dev/null; then
   echo "正在安装 Xcode 命令行工具..."
@@ -53,11 +65,11 @@ fi
 # 7. 刷新配置并测试
 brew update
 brew doctor || true
-~~~
+```
 
 # 安装常用软件
 
-~~~shell
+```shell
 cat > /tmp/Brewfile << 'EOF'
 
 # CLI 工具
@@ -116,12 +128,12 @@ cask "font-source-code-pro"
 EOF
 
 brew bundle --file=/tmp/Brewfile
-~~~
+```
 
 # 系统设置
 
 ## 终端设置
-~~~shell
+```shell
 # Dock
 defaults write com.apple.dock autohide -bool true
 defaults write com.apple.dock autohide-delay -float 0
@@ -150,18 +162,18 @@ defaults write NSGlobalDomain AppleShowAllExtensions -bool true        # 显示�
 defaults write com.apple.menuextra.battery ShowPercent -bool true
 
 killall Dock Finder
-~~~
+```
 
 ## 手动设置
-~~~text
+```text
 **触控板：** 系统设置 → 触控板 → 轻点来点按 ✅
 **三指拖拽：** 辅助功能 → 指针控制 → 触控板选项 → 拖移样式
 **键盘：** 修饰键 → Caps Lock改成Control（程序员必备）
-~~~
+```
 
 # git设置
 
-~~~shell
+```shell
 # Git 全局配置
 git config --global user.name "starhq"
 git config --global user.email "starimba@gmail.com"
@@ -206,11 +218,11 @@ else
     cat "$KEY_PATH.pub"
     echo "👉 访问: https://github.com/settings/ssh/new"
 fi
-~~~
+```
 
 # iterm2设置
 
-~~~shell
+```shell
 # 1. 下载 iTerm2 Material Design 主题
 echo "🎨 Downloading iTerm2 Material Design theme..."
 curl -Ls "https://gh-proxy.org/https://raw.githubusercontent.com/MartinSeeler/iterm2-material-design/master/material-design-colors.itermcolors" \
@@ -263,12 +275,12 @@ echo "🎉 Setup complete!"
 echo "💡 Next steps:"
 echo "  1. 重启终端 或 运行: source ~/.zshrc"
 echo "  2. 在 iTerm2 中：Profiles → Colors → Color Presets → 导入 material-design-colors"
-~~~
+```
 
 
 # 命令行工具配置
 
-~~~shell
+```shell
 # ===================================================================
 # 1. 配置 ~/.fzfrc（增强预览）
 # ===================================================================
@@ -501,13 +513,13 @@ export GRADLE_USER_HOME="$HOME/.gradle"
 echo '{"path": "cz-conventional-changelog"}' > ~/.czrc 
 EOF
 fi
-~~~
+```
 
 # 开发环境配置
 
 ## node.js
 
-~~~shell
+```shell
 asdf plugin add nodejs https://gh-proxy.org/https://github.com/asdf-vm/asdf-nodejs.git
 
 # 注意lts版本,可能还要重启终端
@@ -518,27 +530,27 @@ npm config set registry https://registry.npmmirror.com
 corepack enable
 
 npm install -g typescript tldr commitizen cz-conventional-changelog release-it
-~~~
+```
 
 ## java
-~~~shell
+```shell
 asdf plugin add java https://gh-proxy.org/https://github.com/halcyon/asdf-java.git
 
 asdf install java temurin-25.0.1+8.0.LTS
 asdf install global temurin-25.0.1+8.0.LTS
-~~~
+```
 
 ## maven
 
-~~~shell
+```shell
 asdf plugin add maven https://gh-proxy.org/https://github.com/halcyon/asdf-maven.git
 
 asdf install maven 3.9.12
 asdf global maven 3.9.12
-~~~
+```
 
 ### 以下信息需要写入maven的setting.xml文件中
-~~~xml
+```xml
 <!-- mirror节点 -->
 <mirror>
   <id>aliyunmaven</id>
@@ -575,12 +587,12 @@ asdf global maven 3.9.12
   <activeProfile>jdk-25</activeProfile>
   <activeProfile>parallel-downloads</activeProfile>
 </activeProfiles>
-~~~
+```
 
 
 ## gradle
 
-~~~shell
+```shell
 asdf plugin add gradle https://gh-proxy.org/https://github.com/rfrancis/asdf-gradle.git
 
 asdf install gradle 9.2.1
@@ -625,11 +637,11 @@ org.gradle.daemon=true
 # 日志级别（quiet减少输出）
 org.gradle.logging.level=quiet
 EOF
-~~~
+```
 
 ## golang
 
-~~~shell
+```shell
 asdf plugin add golang https://gh-proxy.org/https://github.com/asdf-community/asdf-golang.git
 
 asdf install golang 1.25.5
@@ -641,10 +653,11 @@ go env -w GOPROXY=https://goproxy.cn,direct
 go env -w GO111MODULE=on
 
 asdf current >> ~/.tool-versions 2>/dev/null
-~~~
+```
 
 # docker
-~~~shell
+
+```shell
 softwareupdate --install-rosetta
 
 cat >> ~/.docker/daemon.json << EOF
@@ -666,11 +679,11 @@ cat >> ~/.docker/daemon.json << EOF
   ]
 }
 EOF
-~~~
+```
 
 # 完整脚本
 
-~~~shell
+```shell
 #!/bin/zsh
 
 # ========================================================================
@@ -1222,4 +1235,4 @@ main() {
 }
 
 main
-~~~
+```

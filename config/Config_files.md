@@ -1,7 +1,16 @@
+---
+date: 2026-01-24
+tags:
+  - config
+  - vscode
+  - git
+---
+
+
 # Vscode配置:
 
 ## settings.json
-~~~json
+```json
 {
   // ─────────────────────────────
   // 🔤 Editor and UI
@@ -248,13 +257,13 @@
     "**/.gradle/**": true
   }
 }
-~~~
+```
 
 # git 配置信息
 
 ## .gitconfig
 
-~~~ini
+```ini
 [user]
 	name = starhq
 	email = starimba@gmail.com
@@ -315,11 +324,11 @@
   	fco = "!f() { git checkout $(git branch --all | fzf --height 40% --reverse | sed 's/.* //'); }; f"
 	# 仅在特性分支上允许 rebase
   	safe-rebase = "!f() { if [[ $(git branch --show-current) != main && $(git branch --show-current) != develop ]]; then git rebase main; else echo 'Cannot rebase main/develop!'; fi; }; f"
-~~~
+```
 
 ## ..gitignore
 
-~~~TEXT
+```TEXT
 HELP.md  
 .gradle  
 build/  
@@ -357,4 +366,4 @@ out/
   
 ### VS Code ###  
 .vscode/
-~~~
+```
