@@ -1,0 +1,114 @@
+
+# docker
+
+```YAML
+FROM alpine:latest
+
+# Set environment variables
+ENV LANG=en_US.UTF-8 \
+    TZ=Asia/Shanghai
+
+# Install dependencies
+RUN set -ex \
+    && sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
+    && apk add --no-cache \
+           tzdata \
+           bash \
+           openssh \
+           procps \
+           curl \
+    # generate ssh keys
+    && ssh-keygen -A \
+    # set root password(not in production env)
+    && echo "root:root" | chpasswd \
+    # allow root user login
+    && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+#start ssh
+CMD ["/usr/sbin/sshd", "-D"]
+```
+
+# Docker-compose
+
+```YAML
+services:
+  go-api:
+    build:
+      context: ../../
+      dockerfile: ./deploy/docker/Dockerfile
+    container_name: go-api
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "127.0.0.1", "8000" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      network:
+        ipv4_address: 172.18.0.11
+    depends_on:
+      - mysql
+      - redis
+
+  mysql:
+    image: mysql:latest
+    container_name: go-mysql
+    restart: on-failure
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: 'example'
+      MYSQL_USER: 'qcloud'
+      MYSQL_PASSWORD: 'qcloud'
+      MYSQL_CHARACTER_SET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    volumes:
+      - nunu-mysql-data:/var/lib/mysql
+    networks:
+      network:
+        ipv4_address: 177.7.0.12
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    container_name: go-redis
+    restart: on-failure
+    ports:
+      - '6379:6379'
+    command: [ "redis-server", "--appendonly", "yes" ]
+    volumes:
+      - nunu-redis-data:/data
+    networks:
+      network:
+        ipv4_address: 177.7.0.13
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  # data will be stored in host's /var/lib/docker/volumes/nunu-mysql-data/_data directory
+  # some give a meaning names, not confuse with other services
+  nunu-mysql-data
+  nunu-redis-data
+
+networks:
+  network:
+    # some service not in this docker-compose can link the net too
+    attachable: true
+    ipam:
+      driver: default
+      config:
+        # 172.18.0.0-172.18.255.255 is the default subnet
+        # 172.18.0.1 is gateway
+        - subnet: 172.18.0.0/16
+
+# in production env,use docker secret to store sensitive data
+```
