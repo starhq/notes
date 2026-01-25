@@ -101,6 +101,7 @@ change_mirror() {
 	detect_distro
 
 	local backup_file="/etc/apt/sources.list.bak.$(date +%Y%m%d%H%M%S)"
+	yellow "Backing up the original /etc/apt/sources.list to $backup_file"
 	sudo cp /etc/apt/sources.list "$backup_file" || error_exit "Failed to backup sources.list"
 	green "Backup created: $backup_file"
 
@@ -407,7 +408,7 @@ HELP
 esac
 EOF
 
-    sudo sed -i "s|__APP_NAME__|$APP_NAME|g" "$script_path"
+    sudo sed -i "s|__APP_NAME__|$(printf '%s' "$APP_NAME")|g" "$script_path"
     sudo chmod +x "$script_path"
     sudo chown "$APP_USER:$APP_USER" "$script_path"
     green "Helper script created: $script_path"
@@ -421,11 +422,12 @@ init_server() {
 	blue "Preparing server's application workspace..."
 	
 	# Create user if not exists
-    if ! id -u "$APP_USER" >/dev/null 2>&1; then
-        sudo useradd -m -s /bin/bash -d "/home/$APP_USER" "$APP_USER" || error_exit "Failed to create user"
-        echo "$APP_USER:$APP_PASSWORD" | sudo chpasswd || error_exit "Failed to set password"
-        green "Created user: $APP_USER (password set)"
-    fi
+    if ! id "$APP_USER" &>/dev/null; then
+	    sudo useradd -m -s /bin/bash -d "/home/$APP_USER" "$APP_USER" || error_exit "Failed to create user"
+	    echo "$APP_USER:$APP_PASSWORD" | sudo chpasswd || error_exit "Failed to set password"
+	    green "Created user: $APP_USER (password set)"
+	fi
+
 	
 	# Create directory structure
 	sudo mkdir -p "$APP_BIN_DIR" "$APP_CONFIG_DIR" "$APP_LIB_DIR" \
@@ -485,7 +487,9 @@ init_client() {
     fi
     
     blue "Copying public key to server..."
-    ssh-copy-id -i "$PUBLIC_KEY" -p "$SSH_PORT" "$APP_USER@$SERVER_IP" || error_exit "Failed to copy SSH key"
+    if ! ssh-copy-id -i "$PUBLIC_KEY" -p "$SSH_PORT" "$APP_USER@$SERVER_IP"; then
+	    error_exit "Failed to copy SSH key to $APP_USER@$SERVER_IP"
+	fi
     
     green "Client SSH configuration completed!"
 }
