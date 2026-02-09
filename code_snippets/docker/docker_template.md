@@ -112,3 +112,9 @@ networks:
 
 # in production env,use docker secret to store sensitive data
 ```
+
+# 常用的docker镜像
+
+```SHELL
+docker run -d -p 9000:9000 -p 8000:8000 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v ~/workspace/docker/portainer/data:/data portainer/portainer-ce:alpine
+```
