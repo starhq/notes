@@ -40,6 +40,8 @@ implementation 'io.micrometer:micrometer-registry-prometheus:1.13.6`
 
 ### 三、Docker Compose 部署配置
 
+#### 0. 脚本
+[[docker_template#prometheus+grafana]]
 #### 1. 配置 Prometheus（数据采集器）
 `prometheus.yml` 中的配置：
 ```yaml
@@ -54,7 +56,7 @@ scrape_configs:
         - host.docker.internal:8001 # Docker 部署填这个
 ```
 
-#### 1. 验证 Prometheus**
+#### 1. 验证 Prometheus
 浏览器访问 `http://localhost:9000`
 
 ### 四、Grafana（大屏展示）
