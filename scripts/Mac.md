@@ -555,6 +555,11 @@ asdf global maven 3.9.12
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ~~~
 
+bun
+~~~Shell
+curl -fsSL https://bun.com/install | bash
+~~~
+
 ### 以下信息需要写入maven的setting.xml文件中
 ```xml
 <!-- mirror节点 -->
