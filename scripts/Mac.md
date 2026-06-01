@@ -533,6 +533,7 @@ npm install -g typescript tldr commitizen cz-conventional-changelog release-it
 ```
 
 ## java
+
 ```shell
 asdf plugin add java https://gh-proxy.org/https://github.com/halcyon/asdf-java.git
 
@@ -548,6 +549,11 @@ asdf plugin add maven https://gh-proxy.org/https://github.com/halcyon/asdf-maven
 asdf install maven 3.9.12
 asdf global maven 3.9.12
 ```
+
+## rust
+~~~Shell
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+~~~
 
 ### 以下信息需要写入maven的setting.xml文件中
 ```xml
