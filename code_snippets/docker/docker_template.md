@@ -1,5 +1,18 @@
 
-# docker
+# 常用的docker镜像
+
+~~~SEHLL
+# portainer
+docker pull portainer/portainer-ce:alpine
+
+# prometheus
+docker pull prom/prometheus:main-distroless
+
+# grafana
+docker pull grafana/grafana-enterprise:nightly-boringcrypto-distroless-slim
+~~~
+
+# Dockerfile
 
 ```YAML
 FROM alpine:latest
@@ -29,6 +42,49 @@ CMD ["/usr/sbin/sshd", "-D"]
 ```
 
 # Docker-compose
+
+## prometheus+grafana
+
+~~~YAML
+environment:
+  HOME: ${HOME}
+
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:main-distroless
+    container_name: star-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ${HOME}/workspace/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: always
+    networks: 
+      - star-monitor
+
+  grafana:
+    image: grafana/grafana-enterprise:nightly-boringcrypto-distroless-slim
+    container_name: star-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - ${HOME}/workspace/docker/grafana:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: always
+    networks: 
+      - star-monitor
+
+networks:
+  star-monitor:
+    driver: bridge
+~~~
+
+
 
 ```YAML
 services:
@@ -113,8 +169,9 @@ networks:
 # in production env,use docker secret to store sensitive data
 ```
 
-# 常用的docker镜像
+# 常用镜像启动命令
 
 ```SHELL
-docker run -d -p 9000:9000 -p 8000:8000 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v ~/workspace/docker/portainer/data:/data portainer/portainer-ce:alpine
+# portainer
+docker run -d -p 9000:9000 -p 8000:8000 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/workspace/docker/portainer/data:/data portainer/portainer-ce:alpine
 ```

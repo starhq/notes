@@ -259,6 +259,53 @@ tags:
 }
 ```
 
+## 项目级的settings.json(放到当前项目的.vscode/settings.json)
+
+```JSON
+{
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.updateBuildConfiguration": "automatic",
+
+    "maven.executable.path": "./gradlew",
+    "java.debug.settings.hotCodeReplace": "auto",
+    "java.debug.settings.console": "integratedTerminal"
+}
+```
+
+## 项目级的launch.json(放到当前项目的.vscode/项目级的launch.json)
+
+```JSON
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+    
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "JavaTemplateApplication",
+            "request": "launch",
+            "mainClass": "com.github.starhq.template.JavaTemplateApplication",
+            "projectName": "java-template"
+        },
+        {
+            "type": "java",
+            "name": "TestJavaTemplateApplication",
+            "request": "launch",
+            "mainClass": "com.github.starhq.template.TestJavaTemplateApplication",
+            "projectName": "java-template"
+        }
+    ]
+}```
+
+
 # git 配置信息
 
 ## .gitconfig
