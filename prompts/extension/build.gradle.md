@@ -1,0 +1,244 @@
+```groovy
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.6'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.sonarqube' version '7.2.2.6593'
+    id 'jacoco'
+}
+
+group = 'com.github.starhq'
+version = '0.0.1-SNAPSHOT'
+description = 'Demo project for Spring Boot'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+// ========================================
+// 全局配置
+// ========================================
+
+ext {
+    codeCoverageExclusions = [
+            // 过滤器
+            '**/filter/**',
+            // 配置文件
+            '**/config/**',
+            // 常量
+            '**/constant/**',
+            // 异常
+            '**/exception/',
+            // 转换器
+            '**/ResourceConverter.class',
+            '**/*ConverterImpl.class',
+            // 响应
+            '**/Result.class',
+            // 空实现
+            '**/Null*.class',
+            // 主类与生成类
+            '**/*Application.class',
+            '**/*$*',
+            '**/*Builder.class',
+            '**/*_.class'
+    ]
+}
+
+jacoco {
+    toolVersion = "0.8.14"
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+//    mavenLocal()
+//    maven { url "https://maven.aliyun.com/nexus/content/repositories/central/" }
+//    maven { url "https://maven.aliyun.com/repository/public" }
+//    maven { url "https://maven.aliyun.com/repository/google" }
+//    maven { url "https://maven.aliyun.com/repository/jcenter" }
+//    maven { url "https://maven.aliyun.com/nexus/content/groups/public/" }
+//    maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
+    mavenCentral()
+}
+
+// ========================================
+// 依赖管理
+// ========================================
+
+dependencies {
+    // --- Spring Boot Starters ---
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-aspectj'
+
+
+    // --- Database ---
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // --- MyBatis Plus ---
+    implementation libs.mybatis.plus.starter
+    implementation libs.mybatis.plus.jsqlparser
+    testImplementation libs.mybatis.plus.test
+
+    // --- JWT ---
+    implementation libs.jjwt.api
+    runtimeOnly libs.jjwt.impl
+    runtimeOnly libs.jjwt.jackson
+
+    // --- Tools ---
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation libs.prometheus
+
+    // --- MapStruct ---
+    implementation libs.mapstruct
+    annotationProcessor libs.mapstruct.processor
+    testAnnotationProcessor libs.mapstruct.processor.test
+
+    // --- Development & Cache ---
+    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+    implementation libs.caffeine
+
+    // --- Test Dependencies ---
+    testImplementation 'org.springframework.boot:spring-boot-starter-cache-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-mail-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// ========================================
+// 测试与覆盖率
+// ========================================
+
+tasks.named('test') {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, excludes: codeCoverageExclusions)
+        }))
+    }
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+}
+
+// 验证覆盖率
+jacocoTestCoverageVerification {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, excludes: codeCoverageExclusions)
+        }))
+    }
+
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.80
+            }
+        }
+    }
+}
+
+// 将覆盖率验证挂载到 check 任务
+check.dependsOn jacocoTestCoverageVerification
+
+// ========================================
+// SonarQube 配置
+// ========================================
+
+sonar {
+    properties {
+        property "sonar.projectName", "java_template"
+        property "sonar.projectDescription", "for ai"
+        property "sonar.projectKey", "starhq_java-template"
+        property "sonar.organization", "starhq"
+        property "sonar.host.url", "https://sonarcloud.io"
+
+        property "sonar.coverage.exclusions", codeCoverageExclusions
+
+        property "sonar.sources", "src/main/java"
+        property "sonar.tests", "src/test/java"
+        property "sonar.java.binaries", "build/classes/java/main"
+        property "sonar.java.source", "25"
+        property "sonar.token", System.getenv("SONAR_TOKEN")
+
+        // 注意：这里引用的是 xml 报告，但上面 jacocoTestReport 设置了 xml.required = false
+        // 如果 Sonar 需要上传覆盖率，请确保 XML 报告是开启的，或者此处路径正确
+        property "sonar.coverage.jacoco.xmlReportPaths", layout.buildDirectory.dir("./build/reports/jacoco/test/jacocoTestReport.xml").get().asFile
+
+    }
+}
+
+// ========================================
+// Jar 构建配置
+// ========================================
+
+def isThinJar = project.hasProperty('thinJar')
+
+// 配置 BootJar (可执行 Jar)
+tasks.named('bootJar') {
+    enabled = !isThinJar
+
+    if (!isThinJar){
+        archiveBaseName.set('java-template')
+        archiveVersion.set('') // 如果需要带版本号，请删除此行
+        archiveClassifier.set('') // 清空 classifier，避免文件名带 -exec
+
+        // 启用分层构建，优化 Docker 镜像构建
+        layered {
+            enabled = true
+        }
+    }
+}
+
+// 普通 Jar (plain jar)
+jar {
+    enabled = isThinJar // 如果是 thinJar 模式，则启用 jar
+    if (isThinJar) {
+        archiveBaseName.set('java-template')
+        archiveVersion.set('') // 如果需要带版本号，请删除此行
+        archiveClassifier.set('') // 清空 classifier，避免文件名带 -exec
+
+        manifest {
+            attributes('Main-Class': 'com.github.starhq.template.JavaTemplateApplication')
+        }
+
+        finalizedBy 'copyDependencies'
+    }
+}
+
+// 使用jar命令的时候,请取下如下注解,用bootJar命令的时候,则注释掉如下代码
+ tasks.register('copyDependencies', Copy) {
+     from configurations.runtimeClasspath
+     into layout.buildDirectory.dir('libs/lib')
+     duplicatesStrategy = DuplicatesStrategy.EXCLUDE   // safer
+ }
+```

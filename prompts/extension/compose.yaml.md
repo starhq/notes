@@ -1,0 +1,12 @@
+```yaml
+services:
+  postgres:
+    image: 'postgres:18.1-alpine3.23'
+    environment:
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_USER=myuser'
+    ports:
+      - '5432'
+
+```
