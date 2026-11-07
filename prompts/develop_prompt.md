@@ -722,3 +722,359 @@ The schema is
 -- [THE SQL SCHEMA WILL BE PROVIDED HERE] --  
 At last, don't forget execute infrastructure template injection which is mentioned in section 3
 ```
+
+# vue
+
+```markdown
+You are an expert in TypeScript, Bun, Vite, Vue.js 3, Vue Router, Pinia, TanStack Query (Vue Query), VueUse, Element Plus, and Tailwind CSS, with deep knowledge of best practices and performance optimization in this stack.
+
+## Code Style and Structure
+
+- Write concise, maintainable, technically accurate TypeScript.
+- Use functional and declarative patterns; avoid classes.
+- Favor iteration and modularization; avoid duplication (DRY).
+- Use descriptive variable names with auxiliary verbs (`isLoading`, `hasError`).
+- **Traditional layered architecture**: organize code by technical role globally (e.g., views in `src/views/`, APIs in `src/api/`, types in `src/types/`, utils in `src/utils/`). Keep concerns strictly separated in their respective directories — define TS interfaces in dedicated `types.ts` files, and abstract pure functions or static data dictionaries into `utils.ts` or `helpers.ts`. Don't embed large business logic or static data directly inside `.vue` files.
+
+## Naming Conventions
+
+- Directories and non-component files: lowercase-with-dashes (`components/user-profile`, `utils/date-format.ts`).
+- Vue component files: PascalCase (`UserList.vue`). Never camelCase or kebab-case.
+- Use multi-word component names to avoid clashing with native HTML elements (`SearchInput.vue`, not `Input.vue`).
+- Base/primitive components: prefix `Base` or `App` (`BaseButton.vue`, `AppIcon.vue`).
+- Singleton layout components: prefix `The` (`TheHeader.vue`, `TheSidebar.vue`).
+- Tightly-coupled child components: prefix with parent name (`UserList.vue`, `UserListItem.vue`, `UserListFilters.vue`).
+- Non-component JS/TS files: camelCase (`userApi.ts`, `formatHelpers.ts`).
+- Favor named exports for utilities and API functions.
+
+## TypeScript & Vue 3 Usage
+
+- TypeScript everywhere; prefer `interface` over `type` for extendability/merging.
+- Avoid enums; use maps for type safety and flexibility.
+- Functional components with typed props.
+- Strictly `<script setup lang="ts">`.
+- Use generics for macros: `defineProps<UserProps>()`, `defineEmits<Emits>()`.
+- `ref()` for primitives, `reactive()` for complex objects/arrays. Destructure props via `toRefs` inside composables when needed.
+
+## Environment & Tooling
+
+- Runtime/package manager: **Bun**. Always use `bun install`, `bun add`, `bun run <script>` — never `npm`/`yarn`/`pnpm`.
+- Build/dev server: **Vite**, running on Bun.
+
+## API & State Management (strict separation)
+
+- **Client state vs. server state must never mix.**
+- **Pinia** — global client state only (auth profile, UI theme, sidebar collapsed state, tab list). Prefer Setup Stores syntax. Never store API list/detail data in Pinia.
+- **TanStack Query (Vue Query)** — the primary data-fetching / server-state layer.
+    - `useQuery` for GET, `useMutation` for POST/PUT/DELETE.
+    - Always define strongly-typed query keys, e.g. `['users', 'list', params]`.
+    - On successful mutation, always `queryClient.invalidateQueries({ queryKey: [...] })` for affected keys.
+- **Axios** — a single centrally-configured instance, used only to execute HTTP requests. `api.ts` functions just return the axios promise (e.g. `return request.get('/users', { params })`); TanStack Query consumes it. Request/response interceptors (auth header, error normalization, 401 refresh-and-retry) live in the central instance, not per-call.
+
+## UI and Styling
+
+- **Element Plus** for complex components (Table, Form, Dialog, Dropdown, etc). Don't mix in Headless UI.
+- **Tailwind CSS** for layout, spacing, typography, and style overrides.
+- Element Plus components are auto-imported via `unplugin-vue-components` — don't hand-write imports for them.
+- Responsive layouts via Tailwind grid/flex utilities.
+
+
+## Icon Usage Convention
+
+> This exists specifically so icon choices never leak into feature code or product specs.
+
+- **Single Wrapper Component**: All icons are rendered through **`AppIcon.vue`** — e.g. `<AppIcon name="user" />`. Business code, menu configs, and API-driven data must use this component.
+- **Library-Agnostic Keys**: Reference icons by string keys (`"user"`, `"settings"`), never import icon components directly in business code.
+- **No Global Registration**: Do NOT globally register Element Plus icons in `main.ts` (avoid `app.component()` loops). `AppIcon.vue` must be self-contained, resolving EP icons via internal dynamic imports (e.g., `shallowRef` + `import('@element-plus/icons-vue')`).
+- **Internal Multi-Source Mapping**: `AppIcon.vue` acts as a facade resolving string keys to actual icons from three underlying sources:
+    1. **Element Plus icons** (internally lazy-loaded).
+    2. **Local custom SVGs** (via `vite-plugin-svg-icons` in `src/assets/icons/`).
+    3. **Iconfont CDN/JS symbols** (via injected `iconfont.js`).
+- **Routing Convention**: Distinguish sources using string prefixes.
+    - Standard keys (`"user"`, `"settings"`) route to Element Plus.
+    - Keys prefixed with `"local-"` route to local Vite SVG sprites.
+    - Keys prefixed with `"ifont-"` route to the Iconfont JS symbol sprite.
+- **Case Insensitivity**: `AppIcon.vue` must internally normalize incoming keys (e.g., convert `"user"` or `"edit-pen"` to PascalCase `"User"` / `"EditPen"`) to match the target library's export format. Business code can freely use kebab-case or lowercase.
+- **Strict Size Control**: Because Element Plus enforces `.el-icon svg { width: 1em }`, `AppIcon.vue` must apply explicit inline styles (width/height based on the `size` prop) to override external CSS and ensure accurate sizing.
+- **Element Plus Integration**: When placing icons inside EP form components (like `<el-input>`), use the **`#prefix` or `#icon` slots** with `<AppIcon />` instead of passing string names to the `prefix-icon` or `icon` attributes.
+- If the underlying icon implementation changes, only **`AppIcon.vue`**'s internal mapping changes — nothing else in the codebase is affected.
+
+## Performance Optimization
+
+- Use VueUse composables where they fit, instead of hand-rolled equivalents.
+- Wrap async components in `<Suspense>` with a fallback UI.
+- Dynamic `import()` for non-critical components/routes.
+- Optimize images: WebP, explicit width/height, lazy loading.
+- Use Vite's code-splitting/chunking for smaller bundles.
+
+## Key Conventions
+
+- Track Web Vitals (LCP, CLS, FID) with Lighthouse/WebPageTest.
+- When a request conflicts with a rule above, follow the rule and flag the conflict rather than silently deviating.
+  
+---
+
+### 🚀 Execution Command
+
+## 1. Project Goals
+
+Build the reusable skeleton of an admin panel: authentication, main layout, dynamic menu-driven navigation, tab-based multi-page workspace, and one fully working sample CRUD page — all running standalone against mock data.
+
+---
+## 2. Functional Requirements
+### Login
+
+- Fields: Username, Password, Captcha code
+- Captcha flow:
+    1. On page load, generate a UUID
+    2. Request captcha image: `GET /captcha?uuid=xxx` → returns image output stream
+    3. Submit login with `{ username, password, captchaCode, uuid }`
+    4. Clicking the captcha image refreshes it with a new UUID
+- "Remember me" checkbox (persists username, not password)
+- Form validation with inline error messages
+- Clean modern design: centered card, subtle gradient/background, responsive down to mobile width
+- Loading state on submit button; disable form during request
+- Error handling: show backend error message (e.g. wrong captcha, wrong credentials) without page reload
+- **Floating Preference Toolbar (Top-Right)**: Implement a floating settings button group in the top-right corner of the login page, similar to Vben Admin. It should include:
+    - **I18n Locale Switcher**: Dropdown to switch system languages.
+    - **Theme Color Picker**: A small palette to switch the primary theme color.
+    - **Dark/Light Mode Toggle**: A switch to toggle between dark and light themes.
+    - **Advanced Transition Animation**: When toggling Dark/Light mode, use the browser's native **View Transitions API** combined with **`clip-path`** CSS animation. The transition should sweep from the top-right corner outward (expanding clip-path) when turning dark, and reverse the animation (sweeping back from the bottom-left to the top-right) when reverting to light mode.
+    - Ensure this toolbar is visually separated from the main login card and does not overlap with it on mobile screens. 
+
+### Main Layout (post-login)
+
+**Header (top bar)**
+
+- Left:
+    - System name/logo (clickable → Dashboard)
+    - Sidebar collapse/expand toggle
+    - **Breadcrumb Navigation**: Implement a dynamic breadcrumb bar immediately.
+	  - **Auto-generation**: Derive the breadcrumb items automatically from Vue Router's `route.matched` records and their `meta.title` fields. Do not hardcode paths.
+	  - **Home Icon**: The first item should always be a clickable Home icon (rendered via `<AppIcon name="home-filled" />` or similar) linking to the Dashboard.
+	  - **Current Page**: The last item represents the current page and should be non-clickable (disabled/active state).
+	  - **Component**: Use Element Plus `<el-breadcrumb>` with Tailwind CSS for alignment and vertical centering.
+- Right:
+    - **Preference Settings Drawer**: Clicking a settings icon (gear) must trigger a right-side drawer (`<el-drawer direction="rtl">`) containing global configuration options.
+	  - **Configurable Items**:
+	    1. **Theme Mode**: Toggle between Light and Dark mode.
+	    2. **Theme Color**: A palette of preset colors (e.g., blue, green, orange). Selecting one dynamically overrides the `--el-color-primary` CSS variable globally.
+	    3. **Typography**: Options to adjust the base font size or font family.
+	  - **State Management**: Use a dedicated Pinia store (e.g., `useAppStore`) to manage these settings. Persist all configurations to `localStorage` so user preferences survive page reloads.
+	  - **Styling**: Use Tailwind CSS for the drawer's internal layout, ensuring clean spacing and grouping for each setting section. Apply changes instantly (live preview) without requiring a page refresh.
+	- **Dark/Light Mode Toggle**: A switch to toggle between dark and light themes.      
+	- Language switch (dropdown: EN / ZH, extensible)    
+    - Fullscreen toggle
+    - "refresh current page" action (re-fetches current page's data without a full reload).
+    - User avatar + username dropdown: **Edit Profil
+      e / Reset Password / Logout**
+    - Logout should clear auth state + redirect to `/login`, and hit a `POST /logout` endpoint if available
+
+**Sidebar**
+
+- Accordion-style collapsible menu, supports collapse-to-icons mode
+- First item is always **Dashboard** (static, not from backend)
+- Remaining items loaded from `GET /users/menus` (or similar) using the structure below
+- Active route highlighting + auto-expand parent of active child
+
+**Menu data contract (backend → frontend):**
+
+```json
+{
+  "id": 1,
+  "name": "User Management",
+  "icon": "User",
+  "url": "/system/user",
+  "sortOrder": 1,
+  "openType": 0,
+  "children": []
+}
+```
+
+- `openType: 0 mean "internal"` → registers as an in-app page, renders in content area
+- `openType: 1 mean "external"` → open the given URL in a new browser tab and do not register a page, does not register a route
+- Menu tree is used both to render the sidebar **and** to dynamically add routes to the router (so refreshing a deep-linked URL doesn't 404)
+
+### **Tab-based workspace** (content area)
+
+- A pinned, non-closable "Home" tab always returns to Dashboard.
+- Opening a menu item opens a closable, drag-to-reorder tab.
+- Right-click context menu on tabs: Close, Close Others, Close All, Refresh
+- Switching tabs must not lose the previous tab's in-progress state (page-level caching, per the rules) — reopening a _closed_ tab should fetch fresh data.
+- Tab list and order survive a page refresh.
+
+### **CRUD page pattern (applies to every business page, built once as a shared pattern)**
+
+- **Filter bar:** search inputs/selects + "Search" and "Reset" buttons above the table.
+- **Toolbar:** "Create" button (top-left) opens a modal form; batch-action buttons (e.g. "Batch Delete") enabled only when rows are selected
+- **Table:**
+    - Checkbox column (select all + per-row)
+    - Data columns (config-driven, not hardcoded per page)
+    - Action column: **Edit** (opens modal, pre-filled) / **Delete** (confirm dialog before calling API)
+- **Pagination:** bottom-right, page size selector + total count
+- **Modal form:** shared component for Create and Edit (same form, different submit endpoint/payload), with field-level validation
+- Loading skeleton/spinner during fetch; empty-state illustration when no data
+
+---
+
+## 3. Cross-cutting Technical Requirements
+
+### Auth & API layer
+
+- **Axios instance creation**:    
+    - Configure global `timeout` and default `X-Requested-With` header.
+- **Request interceptor**:
+    - Attach `X-Device-Fingerprint` header from global client state (`visitorId`).
+    - Attach `Authorization: Bearer <token>` (read from storage, not directly from global client state).
+    - **Endpoint-specific auth**: For `/logout` or `/refresh` endpoints, bypass normal token logic and use the `refresh_token`.
+    - **Proactive Token Refresh**: Check local `tokenExpireTime`. If expired, trigger token refresh via dedicated endpoint.
+        - Use a state manager (`isRefreshing` flag) to prevent concurrent refresh calls.
+        - Queue concurrent requests during refresh and resolve them with the new token once refresh succeeds.
+    - **Request data handling**:
+        - Append timestamp (`_t`) to `GET`/`DELETE` params to prevent client-side caching.
+        - Serialize object data to `application/x-www-form-urlencoded` format using `qs`.
+- **Response interceptor & Error handling**:
+    - **Unwrap envelope**: Return `res.data` directly via the exported wrapper function to unwrap the standard `{ code, data, message }` envelope.
+    - **Error normalization**: Map network/timeout errors (`ERR_NETWORK`, `ECONNABORTED`) to pseudo-HTTP status codes (e.g., 504, 408). Extract backend `message` or fallback to predefined `HTTP_ERROR_MESSAGES`. Reject with a standardized `new Error(message)`.
+    - Log backend error `id` to console if present.
+    - **UI Feedback**: Display the normalized error message using message components(depends on framework).
+- **401 & Auth Failure Handling**:
+    - If proactive token refresh fails, clear token cache and throw a custom flagged error (`__isRefreshTokenError`).
+    - If a `401` HTTP status is received in the response interceptor, trigger a redirect to `/login` (using `router.replace` with a slight delay to allow message display), ensuring no duplicate redirects if already on the login page.
+- **Route guard (`router.beforeEach`)**: _(Assumed requirement based on initial context)_
+    - Redirect unauthenticated users to `/login`.
+    - Redirect authenticated users away from `/login`.
+
+### Keep-Alive
+
+- Opened tab pages are cached via `<keep-alive :include="cachedViews">`
+- Closing a tab removes it from the cache list (so reopening re-fetches fresh data)
+- "Refresh" action force-remounts the component (toggle out of cache, then back in)
+
+### Permission foundation
+
+- Store user's permission codes (e.g. `["user:create", "user:delete"]`) in global client state after login.
+- Build a custom directive (e.g. `v-permission`) to hide/disable buttons or features the user lacks rights for, based on the stored codes.
+- **Routes and menus are entirely driven by the backend** (dynamic route generation). Do not pre-define static business routes or use frontend route filtering.
+- The global route guard should only handle authentication checks (is logged in?) and dynamic route injection (`router.addRoute`), not page-level permission filtering.
+
+### Project structure
+
+```
+src/
+├── api/                # one file per module, thin wrappers around axios
+├── assets/
+├── components/         # shared/reusable components (CrudTable, SearchForm, etc.)
+├── composables/         # useTable, usePermission, useTabs, etc.
+├── directives/          # v-permission
+├── layouts/             # MainLayout (Header+Sidebar+Content+Tabs)
+├── router/
+│   ├── index.ts
+│   └── dynamic-routes.ts   # builds routes from menu API response
+├── stores/               # global clinet state: auth, menu, tabs, app(ui state)
+├── styles/
+├── utils/
+├── views/
+│   ├── login/
+│   ├── dashboard/
+│   └── system/           # sample CRUD module goes here
+└── main.ts
+```
+
+### Non-functional
+
+- Fully responsive (usable down to tablet width; sidebar collapses to drawer on mobile)
+- i18n-ready: no hardcoded UI strings in components, all through `t('key')`
+- `.env.development` / `.env.production` for API base URL
+- ESLint + Prettier configured and passing
+- Code comments on non-obvious logic (dynamic route registration, keep-alive cache management, interceptor logic especially)
+
+---
+
+## 4. Constraints
+
+- Must run fully standalone (`bun install && bun run dev`) against mock data — no real backend required to see the whole flow working.
+- Responsive down to tablet width; sidebar collapses to an overlay on narrow screens.
+- Deep-linking to any internal page must work directly (not only via sidebar clicks).
+
+## 5. Definition of Done 
+
+- Login succeeds against mock auth + captcha.
+- Sidebar renders a nested mock menu tree correctly, including internal vs. external handling.
+- Opening menu items creates tabs with drag-reorder, close, and right-click actions; Dashboard tab is pinned.
+- Sample CRUD page supports create, edit, delete-with-confirmation, search/filter, pagination, and batch delete.
+- Switching between tabs preserves each page's state; closing and reopening a tab re-fetches data.
+
+### 6. Business page
+
+Please generate a complete CRUD business page based on the OpenAPI specification provided below. The page should include a data table display, as well as Create, Update, and Delete (CUD) functionalities.
+
+Strictly follow these generation rules:
+
+**1. File Generation & Architecture** Generate the following three separate files following our traditional layered architecture. Do not mix them into a single `.vue` file:
+
+- `src/types/[module].ts`: Extract and infer all TypeScript interfaces (request params, response entities) from the OpenAPI spec.
+- `src/api/[module].ts`: Encapsulate API request functions for list, create, update, and delete. Import `request` from `@/utils/request`.
+- `src/views/[module]/index.vue`: The main business page.
+-  `src/views/[module]/[module]-add-or-update.vue`: The add or update modal page.
+```
+
+
+I'm attaching some screenshots of an existing web app. Before writing any code,
+analyze them and produce a design specification, not code yet.
+
+For each screenshot, identify:
+
+1. Color palette
+   - Background, surface/card, and text colors (as hex, best estimate)
+   - Primary/brand color, and any secondary accent colors
+   - Semantic colors if visible (success/error/warning states, e.g. in badges,
+     alerts, or form validation)
+   - Border and divider colors
+
+2. Typography
+   - Font style family (e.g. "geometric sans-serif, similar to Inter/SF Pro" —
+     name the closest common web font rather than guessing an exact match)
+   - Approximate type scale: heading sizes vs. body vs. caption/label text,
+     as relative ratios if exact px isn't determinable
+   - Font weights used (regular/medium/semibold/bold) and where each appears
+
+3. Spacing & layout rhythm
+   - Grid structure (columns, sidebar width vs. content, max content width)
+   - Approximate spacing scale (tight/4px-based vs. loose/8px-based rhythm)
+   - Padding inside cards/buttons/inputs, relative to each other
+
+4. Shape & elevation
+   - Border radius: sharp, slightly rounded, or pill-shaped — per component type
+     (buttons vs. cards vs. inputs may differ)
+   - Shadow depth: flat/bordered-only vs. soft elevation vs. strong drop shadow
+
+5. Component inventory
+   - List every distinct UI component visible (buttons by variant, tags, tables,
+     nav items, form fields, modals, etc.) with a one-line description of each
+     variant's appearance
+
+6. Cross-screenshot consistency
+   - Flag anything that looks inconsistent between screenshots (e.g. different
+     radius on buttons across pages) so I can tell you which one is correct
+
+Output this as a structured spec (not prose paragraphs) — I'll review and correct
+values before you generate any tokens or components.
+
+
+
+Using the corrected design spec above, generate:
+
+1. `src/styles/tokens.css` — CSS variables for every color, radius, and spacing
+   value from the spec, following the same HSL-triplet token pattern already
+   used in this project (see tokens.css).
+2. The Tailwind config extension mapping those tokens to utility classes.
+3. Element Plus variable overrides mapping the same tokens to `--el-*` variables.
+
+Then implement [specific page/component] matching the layout structure and
+component inventory from the spec — reference token classes (`bg-primary`,
+`rounded-lg`, etc.), never hardcoded hex values or arbitrary Tailwind colors
+(`bg-blue-500`) that bypass the token system.
+
+Follow the semantic state usage rules in CLAUDE.md for which components get
+primary/danger/warning treatment.
