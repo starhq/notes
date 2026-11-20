@@ -11,20 +11,29 @@ services:
     environment:
       - USER_UID=1000
       - USER_GID=1000
-	  # 域名	
+      # 域名	
       - FORGEJO__server__ROOT_URL=https://forgejo.forgejo.orb.local/
+      - FORGEJO__server__DOMAIN=forgejo.forgejo.orb.local
+      - FORGEJO__server__SSH_DOMAIN=forgejo.forgejo.orb.local
+      
+      # action's log  
+      - FORGEJO__actions__LOG_RETENTION_DAYS=30
+      - FORGEJO__actions__ARTIFACT_RETENTION_DAYS=30
       
       - FORGEJO__database__DB_TYPE=postgres
       - FORGEJO__database__HOST=db:5432
       - FORGEJO__database__NAME=forgejo
       - FORGEJO__database__USER=root
+      # 非安全环境下用下面命令修改数据库密码
+      # docker compose exec db psql -U root -d forgejo -c "ALTER USER root PASSWORD '新密码';"
       - FORGEJO__database__PASSWD=root
-    restart: always
+    restart: unless-stopped
     networks:
       - forgejo
     volumes:
       # ${HOME}环境变量,按情况设置 
       - ${HOME}/forgejo/host:/data
+      - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
       - "3000:3000"
@@ -36,7 +45,7 @@ services:
   db:
     image: postgres:18-alpine
     container_name: forgejo-db
-    restart: always
+    restart: unless-stopped
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
@@ -46,8 +55,8 @@ services:
     volumes:
       # ${HOME}环境变量,按情况设置
       - ${HOME}/postgres:/var/lib/postgresql
-    ports:
-      - "5432:5432"
+    # ports:
+      # - "5432:5432"
     shm_size: "256mb"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U forgejo -d forgejo"]
