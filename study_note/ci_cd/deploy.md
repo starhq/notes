@@ -119,6 +119,8 @@ runner:
     GOPROXY: "https://goproxy.cn,direct"
     npm_config_registry: "https://registry.npmmirror.com"
     PIP_INDEX_URL: "https://pypi.tuna.tsinghua.edu.cn/simple"
+    
+  insecure: true
 
   # Which `runs-on:` values this runner answers to, and the default image for each.
   # The ci-* images are built locally by build-ci-images.sh (Node.js is added to
@@ -336,13 +338,13 @@ ARG BASE
 FROM node:24-bookworm-slim AS node
 FROM ${BASE}
 # Merge Node.js + npm/npx/corepack into the toolchain image
-COPY --from=node /usr/local/bin/node       /usr/local/bin/node
-COPY --from=node /usr/local/bin/npm        /usr/local/bin/npm
-COPY --from=node /usr/local/bin/npx        /usr/local/bin/npx
-COPY --from=node /usr/local/bin/corepack   /usr/local/bin/corepack
+COPY --from=node /usr/local/bin/ /usr/local/bin/
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 # git/curl/CA certs are needed by checkout and most build tools
-RUN apt-get update \
+RUN set -eux; \
+    find /etc/apt -name '*.sources' -o -name 'sources.list' | \
+      xargs -r sed -i 's|deb.debian.org|mirrors.aliyun.com|g; s|archive.ubuntu.com|mirrors.aliyun.com|g' || true; \
+    apt-get update \
  && apt-get install -y --no-install-recommends git ca-certificates curl \
  && rm -rf /var/lib/apt/lists/* \
  && node --version && npm --version && corepack --version && git --version
@@ -367,7 +369,7 @@ docker compose exec -T docker-in-docker docker image prune -f
 echo "==> Done. Images available to the runner:"
 docker compose exec -T docker-in-docker docker images 'ci-*'
 echo "==> ci-* tags referenced by runner-config.yml (keep in sync!):"
-grep -o 'ci-[a-z]*:[0-9.]*' runner-config.yml | sort -u || true
+grep -o 'ci-[a-z]*:[0-9.]*' data/runner-config.yml | sort -u || true
 
 if ((${#FAILED[@]} > 0)); then
   echo "!! Build FAILED for: ${FAILED[*]}" >&2
